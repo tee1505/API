@@ -1,35 +1,663 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Product API Test</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Product Manager</title>
+
+  <style>
+    :root{
+      --bg: #0b1020;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.09);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.65);
+      --line: rgba(255,255,255,.12);
+      --accent: #f5c542;  /* ทอง */
+      --accent2:#6dd5ff;  /* ฟ้า */
+      --danger:#ff4d6d;
+      --ok:#2ee59d;
+      --shadow: 0 18px 50px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans Thai", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 0%, rgba(245,197,66,.20), transparent 60%),
+        radial-gradient(900px 500px at 90% 20%, rgba(109,213,255,.18), transparent 55%),
+        radial-gradient(900px 700px at 60% 100%, rgba(46,229,157,.10), transparent 60%),
+        var(--bg);
+      min-height:100vh;
+      padding: 28px;
+    }
+
+    .wrap{
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .topbar{
+      display:flex;
+      gap:16px;
+      align-items:flex-end;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .title h1{
+      margin:0;
+      font-size: 28px;
+      letter-spacing: .2px;
+    }
+    .title p{
+      margin:0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .card{
+      background: linear-gradient(180deg, var(--card), rgba(255,255,255,.04));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr 1.9fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: 1fr; }
+      .topbar{ flex-direction: column; align-items: flex-start; }
+    }
+
+    .section{
+      padding: 18px;
+    }
+
+    .section h2{
+      margin: 0 0 10px;
+      font-size: 16px;
+      color: rgba(255,255,255,.88);
+      letter-spacing: .2px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    label{
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    input{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      outline: none;
+      transition: .2s;
+    }
+    input:focus{
+      border-color: rgba(245,197,66,.55);
+      box-shadow: 0 0 0 3px rgba(245,197,66,.12);
+    }
+
+    .row{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+    }
+    .row > * { flex: 1; }
+    .row .auto { flex: 0 0 auto; }
+
+    .btn{
+      cursor:pointer;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 14px;
+      transition: .2s;
+      font-weight: 600;
+      letter-spacing: .2px;
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      user-select:none;
+    }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.12); }
+    .btn:active{ transform: translateY(0px); }
+
+    .btn-primary{
+      border-color: rgba(245,197,66,.35);
+      background: linear-gradient(180deg, rgba(245,197,66,.25), rgba(245,197,66,.12));
+    }
+    .btn-primary:hover{ background: linear-gradient(180deg, rgba(245,197,66,.32), rgba(245,197,66,.16)); }
+
+    .btn-danger{
+      border-color: rgba(255,77,109,.35);
+      background: rgba(255,77,109,.12);
+    }
+    .btn-danger:hover{ background: rgba(255,77,109,.18); }
+
+    .btn-ghost{
+      border-color: transparent;
+      background: transparent;
+    }
+    .btn-ghost:hover{
+      background: rgba(255,255,255,.08);
+    }
+
+    .pill{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toolbar{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items:center;
+      margin-bottom: 12px;
+    }
+
+    .tablewrap{
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      overflow:hidden;
+      background: rgba(0,0,0,.18);
+    }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+    }
+
+    thead{
+      background: rgba(255,255,255,.06);
+    }
+
+    th, td{
+      text-align:left;
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      font-size: 14px;
+    }
+
+    th{
+      color: rgba(255,255,255,.80);
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing:.2px;
+    }
+
+    td{
+      color: rgba(255,255,255,.88);
+    }
+
+    .muted{ color: var(--muted); }
+
+    .actions{
+      display:flex;
+      gap:8px;
+      flex-wrap: wrap;
+    }
+
+    .empty{
+      padding: 24px;
+      text-align:center;
+      color: var(--muted);
+    }
+
+    /* Modal */
+    .modal-backdrop{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 50;
+    }
+    .modal{
+      width: min(520px, 100%);
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(20,25,45,.98), rgba(12,16,32,.98));
+      border: 1px solid rgba(255,255,255,.16);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .modal .head{
+      padding: 14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .modal .head b{ font-size: 14px; }
+    .modal .body{ padding: 16px; }
+    .modal .foot{
+      padding: 14px 16px;
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      border-top: 1px solid rgba(255,255,255,.10);
+    }
+
+    /* Toast */
+    .toast{
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      z-index: 80;
+    }
+    .toast .item{
+      width: min(360px, calc(100vw - 36px));
+      padding: 12px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.32);
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      animation: pop .18s ease-out;
+    }
+    @keyframes pop{ from{ transform: translateY(8px); opacity:0; } to{ transform: translateY(0); opacity:1; } }
+    .dot{
+      width:10px; height:10px; border-radius:999px; margin-top: 4px;
+      background: var(--accent2);
+      flex: 0 0 auto;
+    }
+    .dot.ok{ background: var(--ok); }
+    .dot.bad{ background: var(--danger); }
+    .toast .item .t b{ font-size: 13px; display:block; margin-bottom: 2px; }
+    .toast .item .t span{ font-size: 13px; color: var(--muted); }
+  </style>
 </head>
 
 <body>
-<h2>เพิ่มสินค้า</h2>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title">
+        <h1>🛒 Product Manager</h1>
+        <p>CRUD ครบ ๆ: เพิ่ม / ดู / แก้ไข / ลบ + UI สวย + ใช้ API เดิม</p>
+      </div>
+      <div class="pill">
+        <span>API:</span>
+        <span id="apiText" style="color: rgba(255,255,255,.85)"></span>
+      </div>
+    </div>
 
-<input type="text" id="name" placeholder="ชื่อสินค้า">
-<input type="number" id="price" placeholder="ราคา">
-<button onclick="addProduct()">เพิ่มสินค้า</button>
+    <div class="grid">
+      <!-- Left: Create -->
+      <div class="card">
+        <div class="section">
+          <h2>เพิ่มสินค้า</h2>
 
-<script>
-function addProduct() {
-  fetch("https://hosting.udru.ac.th/~it67040233114/API/api/products.php", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json; charset=UTF-8"
-    },
-    body: JSON.stringify({
-      product_name: document.getElementById("name").value,
-      price: document.getElementById("price").value
-    })
-  })
-  .then(res => res.json())
-  .then(data => console.log(data))
-  .catch(err => console.error(err));
-}
-</script>
+          <div class="field">
+            <label>ชื่อสินค้า</label>
+            <input id="name" type="text" placeholder="เช่น น้ำเปล่า 600ml" />
+          </div>
 
+          <div class="field">
+            <label>ราคา</label>
+            <input id="price" type="number" placeholder="เช่น 15" />
+          </div>
+
+          <div class="row">
+            <button class="btn btn-primary" onclick="createProduct()">
+              ➕ เพิ่มสินค้า
+            </button>
+            <button class="btn btn-ghost" onclick="resetForm()">
+              รีเซ็ต
+            </button>
+          </div>
+
+          <div style="height:14px"></div>
+
+          <div class="row">
+            <button class="btn" onclick="loadProducts()">
+              🔄 โหลดรายการใหม่
+            </button>
+            <div class="pill auto">
+              ทั้งหมด: <b id="count">0</b> รายการ
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: List -->
+      <div class="card">
+        <div class="section">
+          <div class="toolbar">
+            <h2 style="margin:0">รายการสินค้า</h2>
+            <div class="row" style="max-width: 420px;">
+              <input id="search" type="text" placeholder="ค้นหาชื่อสินค้า..." oninput="renderTable()" />
+              <button class="btn auto" onclick="clearSearch()">ล้าง</button>
+            </div>
+          </div>
+
+          <div class="tablewrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 80px;">ID</th>
+                  <th>ชื่อสินค้า</th>
+                  <th style="width: 140px;">ราคา</th>
+                  <th style="width: 220px;">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="tbody">
+                <tr><td colspan="4" class="empty">กำลังโหลด...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="margin-top:10px; color: var(--muted); font-size: 13px;">
+            ทิป: กด “แก้ไข” จะเด้งโมเดลขึ้นมาให้แก้สบาย ๆ
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="head">
+        <b>✏️ แก้ไขสินค้า</b>
+        <button class="btn btn-ghost" onclick="hideModal()">✕</button>
+      </div>
+      <div class="body">
+        <input type="hidden" id="editId" />
+        <div class="field">
+          <label>ชื่อสินค้า</label>
+          <input id="editName" type="text" />
+        </div>
+        <div class="field">
+          <label>ราคา</label>
+          <input id="editPrice" type="number" />
+        </div>
+      </div>
+      <div class="foot">
+        <button class="btn btn-ghost" onclick="hideModal()">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="updateProduct()">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ==========================
+    // CONFIG
+    // ==========================
+    const API_URL = "https://hosting.udru.ac.th/~it67040233114/API/api/products.php";
+    document.getElementById("apiText").textContent = API_URL;
+
+    let products = [];
+
+    // ==========================
+    // HELPERS
+    // ==========================
+    const qs = (id) => document.getElementById(id);
+
+    function money(n){
+      const num = Number(n);
+      if (Number.isNaN(num)) return "-";
+      return num.toLocaleString("th-TH");
+    }
+
+    function toast(type, title, msg){
+      const box = qs("toast");
+      const item = document.createElement("div");
+      item.className = "item";
+      const dot = document.createElement("div");
+      dot.className = "dot" + (type === "ok" ? " ok" : type === "bad" ? " bad" : "");
+      const t = document.createElement("div");
+      t.className = "t";
+      t.innerHTML = `<b>${title}</b><span>${msg}</span>`;
+      item.appendChild(dot);
+      item.appendChild(t);
+      box.appendChild(item);
+
+      setTimeout(() => {
+        item.style.opacity = "0";
+        item.style.transform = "translateY(6px)";
+        item.style.transition = ".2s";
+        setTimeout(() => item.remove(), 220);
+      }, 2400);
+    }
+
+    function resetForm(){
+      qs("name").value = "";
+      qs("price").value = "";
+      qs("name").focus();
+    }
+
+    function clearSearch(){
+      qs("search").value = "";
+      renderTable();
+    }
+
+    // ==========================
+    // API CALLS
+    // ==========================
+    async function loadProducts(){
+      qs("tbody").innerHTML = `<tr><td colspan="4" class="empty">กำลังโหลด...</td></tr>`;
+      try{
+        const res = await fetch(API_URL, { method: "GET" });
+        const data = await res.json();
+        products = Array.isArray(data) ? data : [];
+        qs("count").textContent = products.length;
+        renderTable();
+      }catch(err){
+        console.error(err);
+        qs("tbody").innerHTML = `<tr><td colspan="4" class="empty">โหลดไม่สำเร็จ ลองใหม่</td></tr>`;
+        toast("bad", "โหลดข้อมูลไม่สำเร็จ", "เช็ค API / เน็ต / CORS");
+      }
+    }
+
+    async function createProduct(){
+      const product_name = qs("name").value.trim();
+      const price = qs("price").value;
+
+      if(!product_name){
+        toast("bad", "กรอกชื่อสินค้าก่อน", "ชื่อห้ามว่างนะ");
+        qs("name").focus();
+        return;
+      }
+      if(price === "" || Number(price) < 0){
+        toast("bad", "ราคาผิด", "ใส่ราคาเป็นเลข >= 0");
+        qs("price").focus();
+        return;
+      }
+
+      try{
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json; charset=UTF-8" },
+          body: JSON.stringify({ product_name, price })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if(!res.ok){
+          toast("bad", "เพิ่มไม่สำเร็จ", "API ตอบกลับไม่โอเค");
+          return;
+        }
+        toast("ok", "เพิ่มสำเร็จ", data.message || "บันทึกสินค้าแล้ว");
+        resetForm();
+        await loadProducts();
+      }catch(err){
+        console.error(err);
+        toast("bad", "เพิ่มไม่สำเร็จ", "เช็ค API / เน็ต / CORS");
+      }
+    }
+
+    function openEditModal(p){
+      qs("editId").value = p.id;
+      qs("editName").value = p.product_name ?? "";
+      qs("editPrice").value = p.price ?? 0;
+      showModal();
+    }
+
+    async function updateProduct(){
+      const id = Number(qs("editId").value);
+      const product_name = qs("editName").value.trim();
+      const price = qs("editPrice").value;
+
+      if(!id){
+        toast("bad", "แก้ไขไม่สำเร็จ", "ID ไม่ถูกต้อง");
+        return;
+      }
+      if(!product_name){
+        toast("bad", "กรอกชื่อสินค้าก่อน", "ชื่อห้ามว่างนะ");
+        qs("editName").focus();
+        return;
+      }
+      if(price === "" || Number(price) < 0){
+        toast("bad", "ราคาผิด", "ใส่ราคาเป็นเลข >= 0");
+        qs("editPrice").focus();
+        return;
+      }
+
+      try{
+        const res = await fetch(API_URL, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json; charset=UTF-8" },
+          body: JSON.stringify({ id, product_name, price })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if(!res.ok){
+          toast("bad", "แก้ไขไม่สำเร็จ", "API ตอบกลับไม่โอเค");
+          return;
+        }
+        toast("ok", "แก้ไขสำเร็จ", data.message || "อัปเดตสินค้าแล้ว");
+        hideModal();
+        await loadProducts();
+      }catch(err){
+        console.error(err);
+        toast("bad", "แก้ไขไม่สำเร็จ", "เช็ค API / เน็ต / CORS");
+      }
+    }
+
+    async function deleteProduct(id, name){
+      const ok = confirm(`ลบสินค้า: ${name} (ID ${id}) ?`);
+      if(!ok) return;
+
+      try{
+        const res = await fetch(API_URL, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json; charset=UTF-8" },
+          body: JSON.stringify({ id })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if(!res.ok){
+          toast("bad", "ลบไม่สำเร็จ", "API ตอบกลับไม่โอเค");
+          return;
+        }
+        toast("ok", "ลบสำเร็จ", data.message || "ลบสินค้าแล้ว");
+        await loadProducts();
+      }catch(err){
+        console.error(err);
+        toast("bad", "ลบไม่สำเร็จ", "เช็ค API / เน็ต / CORS");
+      }
+    }
+
+    // ==========================
+    // RENDER
+    // ==========================
+    function renderTable(){
+      const term = qs("search").value.trim().toLowerCase();
+      const filtered = term
+        ? products.filter(p => String(p.product_name ?? "").toLowerCase().includes(term))
+        : products;
+
+      qs("count").textContent = filtered.length;
+
+      const tb = qs("tbody");
+      if(!filtered.length){
+        tb.innerHTML = `<tr><td colspan="4" class="empty">ไม่เจอรายการที่ค้นหา</td></tr>`;
+        return;
+      }
+
+      tb.innerHTML = filtered.map(p => `
+        <tr>
+          <td class="muted">${p.id}</td>
+          <td>${escapeHtml(p.product_name ?? "")}</td>
+          <td>${money(p.price)} ฿</td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-primary" onclick='openEditModal(${JSON.stringify(p)})'>แก้ไข</button>
+              <button class="btn btn-danger" onclick='deleteProduct(${p.id}, ${JSON.stringify(p.product_name ?? "")})'>ลบ</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    // ==========================
+    // MODAL
+    // ==========================
+    function showModal(){
+      qs("modalBackdrop").style.display = "flex";
+      setTimeout(() => qs("editName").focus(), 50);
+    }
+    function hideModal(){
+      qs("modalBackdrop").style.display = "none";
+    }
+    function closeModal(e){
+      // click outside closes
+      hideModal();
+    }
+
+    // init
+    loadProducts();
+  </script>
 </body>
 </html>
