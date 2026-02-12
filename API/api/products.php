@@ -2,84 +2,98 @@
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+// รองรับ preflight request ของ browser (สำคัญมากสำหรับ PUT/DELETE)
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
 
 include_once "../config/database.php";
+
 $method = $_SERVER['REQUEST_METHOD'];
+
 switch ($method) {
 
-// ======================
-// GET (อ่านข้อมูลทั้งหมด)
-// ======================
-case 'GET':
+    // ======================
+    // GET (อ่านข้อมูลทั้งหมด)
+    // ======================
+    case 'GET':
 
-$sql = "SELECT * FROM products";
-$result = $conn->query($sql);
+        $sql = "SELECT * FROM products";
+        $result = $conn->query($sql);
 
-$products = [];
-while ($row = $result->fetch_assoc()) {
-$products[] = $row;
-}
+        $products = [];
+        while ($row = $result->fetch_assoc()) {
+            $products[] = $row;
+        }
 
-echo json_encode($products);
-break;
+        echo json_encode($products);
+        break;
 
-// ======================
-// POST (เพิ่มข้อมูล)
-// ======================
-case 'POST':
-$data = json_decode(file_get_contents("php://input"));
+    // ======================
+    // POST (เพิ่มข้อมูล)
+    // ======================
+    case 'POST':
 
-$sql = "INSERT INTO products (product_name, price)
-VALUES ('$data->product_name', '$data->price')";
-if ($conn->query($sql)) {
-echo json_encode([
-"status" => 201,
-"message" => "Product created successfully"
-]);
-}
+        $data = json_decode(file_get_contents("php://input"));
 
-break;
+        $sql = "INSERT INTO products (product_name, price)
+                VALUES ('$data->product_name', '$data->price')";
 
-// ======================
-// PUT (แก้ไขข้อมูล)
-// ======================
-case 'PUT':
+        if ($conn->query($sql)) {
+            echo json_encode([
+                "status" => 201,
+                "message" => "Product created successfully"
+            ]);
+        }
 
-$data = json_decode(file_get_contents("php://input"));
-$sql = "UPDATE products
-SET product_name='$data->product_name',
-price='$data->price'
-WHERE id=$data->id";
+        break;
 
-if ($conn->query($sql)) {
-echo json_encode([
-"status" => 200,
-"message" => "Product updated successfully"
-]);
-}
-break;
+    // ======================
+    // PUT (แก้ไขข้อมูล)
+    // ======================
+    case 'PUT':
 
-// ======================
-// DELETE (ลบข้อมูล)
-// ======================
-case 'DELETE':
+        $data = json_decode(file_get_contents("php://input"));
 
-$data = json_decode(file_get_contents("php://input"));
-$sql = "DELETE FROM products WHERE id=$data->id";
+        $sql = "UPDATE products
+                SET product_name='$data->product_name',
+                    price='$data->price'
+                WHERE id=$data->id";
 
-if ($conn->query($sql)) {
-echo json_encode([
-"status" => 200,
-"message" => "Product deleted successfully"
-]);
-}
+        if ($conn->query($sql)) {
+            echo json_encode([
+                "status" => 200,
+                "message" => "Product updated successfully"
+            ]);
+        }
 
-break;
+        break;
 
-default:
-echo json_encode([
-"status" => 400,
-"message" => "Invalid request"
-]);
+    // ======================
+    // DELETE (ลบข้อมูล)
+    // ======================
+    case 'DELETE':
+
+        $data = json_decode(file_get_contents("php://input"));
+
+        $sql = "DELETE FROM products WHERE id=$data->id";
+
+        if ($conn->query($sql)) {
+            echo json_encode([
+                "status" => 200,
+                "message" => "Product deleted successfully"
+            ]);
+        }
+
+        break;
+
+    default:
+        echo json_encode([
+            "status" => 400,
+            "message" => "Invalid request"
+        ]);
 }
 ?>
